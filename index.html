@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>👽Ivanovich's Space Adventure👽</title>
+        <link rel="icon"  type="image/png" href="images/favicon.png">
+
+
+        <style>
+            body{
+                background-color: #16161D;
+                overflow-x: hidden;
+            }
+            @font-face {
+            font-family: 'ScoreFont';
+            src: url('assets/ka1.ttf');
+            }
+            @font-face {
+            font-family: 'FallingLetters';
+            src: url('assets/FunSized.ttf');
+            }
+        </style>
+
+
+        <script>
+            //Gloval Variables
+            var canvasinfo=[];
+            var Jelly=[];
+            Jelly.spawned=true
+            Jelly.PosX=0;
+            Jelly.Speed=0;
+            var bulletarray=[];
+            var textarray=[];
+            var bulletcooldown=false;
+            var textheight=100;
+            var textX=200;
+            var CollisionCooldown=false;
+            var score=0;
+            var wasHit=false;
+            var hitPosX=0;
+            var hitPosY=0;
+
+            function draw(){
+            //Canvas Context
+            var c = document.getElementById("Canvas");
+            var ctx = c.getContext("2d");
+
+            //Canvas Resize
+            canvasinfo.width = window.innerWidth*0.9;
+            canvasinfo.height = window.innerHeight*0.9;
+
+                ctx.canvas.width=canvasinfo.width;
+                ctx.canvas.height=canvasinfo.height;
+
+            //Jelly static properties
+            Jelly.image = document.getElementById("Jelly");
+            Jelly.background = document.getElementById("Background");
+
+            Jelly.size = ctx.canvas.width/20;
+            Jelly.XLLimit=0;
+            Jelly.XRLimit=ctx.canvas.width-Jelly.size;
+            Jelly.Speed=5;
+    
+            if(Jelly.spawned==true){
+                Jelly.spawned=false;
+            Jelly.backgroundPosY=-3000;
+            Jelly.PosX=canvasinfo.width/2-Jelly.size/2;}
+
+
+            //Jelly dynamic properties: Movement
+            if(Jelly.moving==true){
+                if(Jelly.movingRight==true){
+                    if(Jelly.PosX<Jelly.XRLimit-Jelly.size/2){
+                    Jelly.PosX=Jelly.PosX+Jelly.Speed;
+                    }else{Jelly.moving=false}
+                }
+                else if(Jelly.movingRight==false){
+                    if(Jelly.PosX>Jelly.XLLimit+Jelly.size/2){
+                    Jelly.PosX=Jelly.PosX-Jelly.Speed;
+                    }else{Jelly.moving=false}
+                }
+            }
+
+            if(Jelly.backgroundPosY<0){
+            Jelly.backgroundPosY=Jelly.backgroundPosY+5;
+            }else{
+                Jelly.backgroundPosY=-3000; 
+            }
+
+            //Render Scene
+            ctx.canvas.style.background = "#504F80";
+            ctx.drawImage(Jelly.background,0,Jelly.backgroundPosY,canvasinfo.width,4000);
+            ctx.drawImage(Jelly.image, Jelly.PosX, canvasinfo.height-Jelly.size*1.5,Jelly.size,Jelly.size);
+            
+
+            //Render Scene: Text
+
+            for(j=0;j<textarray.length;j++){
+            ctx.font = "50px FallingLetters";
+            
+            ctx.fillStyle = "cyan";
+            ctx.fillText(textarray[j].string, textarray[j].PosX+2, textarray[j].PosY);
+            ctx.fillStyle = "red";
+            ctx.fillText(textarray[j].string, textarray[j].PosX-2, textarray[j].PosY);
+            textarray[j].PosY=textarray[j].PosY+textarray[j].speed;
+            ctx.fillStyle = "white";
+            ctx.fillText(textarray[j].string, textarray[j].PosX, textarray[j].PosY);
+
+            if(textarray[j].PosY>canvasinfo.height){
+                    textarray.splice(j,1);
+                }
+            }
+
+            //if(textarray.length>0){console.log(parseInt(textarray[0].PosX)+','+parseInt(textarray[0].PosY))}
+
+            
+            //Render Scene: Bullets
+            for(i=0;i<bulletarray.length;i++){
+                ctx.beginPath();
+                ctx.arc(bulletarray[i].PosX,bulletarray[i].PosY, 6, 0, Math.PI * 2);
+                ctx.fillStyle = "#62C4BE";
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.arc(bulletarray[i].PosX,bulletarray[i].PosY, 3, 0, Math.PI * 2);
+                ctx.fillStyle = "#A6E3DF";
+                ctx.fill();
+                
+                bulletarray[i].PosY=bulletarray[i].PosY-bulletarray[i].speed;
+                if(bulletarray[i].PosY<0){
+                    bulletarray.splice(i,1);
+                }
+                
+                //if(bulletarray.length>0){console.log(parseInt(bulletarray[0].PosX)+','+parseInt(bulletarray[0].PosY))}
+                }
+
+            //Bullet Collision
+            if(bulletarray.length>0 && textarray.length>0 && CollisionCooldown==false){
+                CollisionCooldown=true;
+                setTimeout(() => {CollisionCooldown=false;}, 50);
+
+                for(j=0;j<textarray.length;j++){
+                    for(i=0;i<bulletarray.length;i++){
+
+                    if(bulletarray.length==0 || textarray.length==0){
+                        j=textarray.length; 
+                        i=bulletarray.length;
+                        
+                    }
+                    if(Math.abs(bulletarray[i].PosX-textarray[j].PosX)+Math.abs(bulletarray[i].PosY-textarray[j].PosY)<=50 && textarray[j].PosY>100){
+
+                        bulletarray[i].PosX=8000;
+                        bulletarray[i].PosY=8000;
+
+                        textarray[j].PosX=-9000;
+                        textarray[j].PosY=-9000;
+
+                        setTimeout(() => {
+                        bulletarray.splice(i,1); 
+                        textarray.splice(j,1);
+                        
+                        score=score+100;
+                        }, 100);
+                        
+
+                        console.log('colision')}
+
+                    }
+                }
+            }
+            //Print Score
+            ctx.font = "50px ScoreFont";
+            ctx.fillStyle = "white";
+            ctx.fillText("Score:"+score,100,100);
+
+            window.requestAnimationFrame(draw);
+            }
+
+            //Set Movement Status
+            function move(direction){
+
+                if(direction==true){
+                    
+                Jelly.moving=true;
+                Jelly.movingRight=true;
+                }
+
+                else if(direction==false){
+                        
+                Jelly.moving=true;
+                Jelly.movingRight=false;
+                }
+            }
+            //Bullet Spawn
+            function dispara(){
+                
+                if(bulletcooldown==false){
+                var bullet=new bala();
+                bulletcooldown=true;
+                setTimeout(() => {
+                    bulletcooldown=false;
+                }, 100);
+                bulletarray.push(bullet);
+                console.log(bulletarray);
+                }
+                }
+            
+            function bala(){
+                this.PosY=canvasinfo.height-Jelly.size*1.5;
+                this.size=6;
+                this.PosX=Jelly.PosX+Jelly.size/2-this.size/2;
+                this.speed=3;
+                this.colision=false;
+            }
+            //Text Star Wars
+            function rollingtext(){
+                // $= BReak #= LineBreak 
+                var rolltextfull=
+                "H o l a   I v a n , $ "+
+                "Q u e   t a l   e s t a s ? $ "+
+                "E s p e r o   q u e   b i e n $ "+
+                "c o m o d o   p o r q u e $ "+
+                "te   h e m o s   p r e p a r a d o $ "+
+                "e s t o   p a r a   q u e $ "+
+                "l o   f l i p e s # "+
+
+                "S a b e m o s   q u e   t e $ "+
+                "e n c a n t a n   l o s $ "+
+                "a l i s   y   l a s   a l i s $ "+
+                "a s i   q u e $ "+
+                "t e   d a m o s   l a $ "+
+                "b i e n v e n i d a   a $ "+
+                "u n   v i a j e   d e $ "+
+                "o t r a   g a l a x i a # "+
+
+                "E s p e r a m o s   q u e $ "+
+                "t e   d e j e   t a n $ "+
+                "a t u r d i d o   c o m o $ "+
+                "a   t u s   c o m p a n e r o s $ "+
+                "e n   e l   V a l o r a n t  # "+
+
+                "E n   r e a l i d a d   e s $ "+
+                "u n a   e x c u s a   p a r a $ "+
+                "v e r   c u a n t o s $ "+
+                "c h i s t e s   m a l o s $ "+
+                "s o m o s   c a p a c e s   d e $ "+
+                "m e t e r   e n   u n   s t r i n g $ "+
+                "s i n   q u e   f a l l e   J S . # "+
+
+                "Y   h a c e r t e   m a s $ "+
+                "l l e v a d e r o   e l   h e c h o $ "+
+                "d e   q u e   t e   h a c e s $ "+
+                "m a y o r c e t e  # "+
+
+                "Y a   p u e d o   i m a g i n a r t e $ "+
+                "p o n i e n d o   p o s i t i v o s $ "+
+                "a l   m o j o n   q u e   h i z o $ "+
+                "g o n z a l o ,   e s a s   c o s a s $ "+
+                "s o l o   l a s   p u e d e $ "+
+                "e x p l i c a r   l a   e d a d . # "+
+
+                "P e r o   n o   t e   p r e o c u p e s $ "+
+                "n o s o t r o s   s i e m p r e $ "+
+                "v a m o s   a   e s t a r   p a r a $ "+
+                "a p o y a r t e  # "+
+
+                "P o r   e s o   e s p e r a m o s $ "+
+                "q u e   n o   v u e l v a s   a   t u $ "+
+                "p a t r i a ,   p a r a  $ "+
+                "p e r s e g u i r   t u   s u e n o $ "+
+                "d e   p o n e r   u n a $ "+
+                "t i e n d a   d e   v a p e s   q u e $ "+
+                "s e   l l a m e   a l i e n w a r e $ "+
+
+                "n o s   p o n d r i a m o s   m u y $ "+
+                "t r i s t e s   s i n   v o l v e r $ "+
+                "a   v e r   e s a   m e l e n a $ "+
+                "d e   v i k i n g o # "+
+
+                "o h    f u c k # "+
+                "b u e n o   n o   p o d r a s $ "+
+                "h a c e r   e l   c o s p l a y $ "+
+                "d e   b r e a c h   p e r o $ "+
+                "t e   s e g u i r e m o s $ "+
+                "q u e r i e n d o < 3 # "+
+
+                "t u s   a m i g o s   t e   d e s e a n $ "+
+                "u n   f e l i z   C U M - p l e a n o s $ "+
+                "c u i d a d o   c o n   l o s $ "+
+                "c u b i t o s # "+
+                " T H E   E N D";
+
+                var rolltextsliced=rolltextfull.split(' ');
+                console.log(rolltextsliced);
+
+                for(i=0;i<rolltextsliced.length;i++){
+                if(rolltextsliced[i]=='$'){
+                    var rolltext=new text('<BR>');
+                    textX=200;
+                    textarray.push(rolltext);
+                }else if(rolltextsliced[i]=='#'){
+                    var rolltext=new text(' ');
+                    textX=200;
+                    textheight=textheight-200;
+                    textarray.push(rolltext);
+                }else{
+                    if(textX>canvasinfo.width-50){textX=200;}
+                var rolltext=new text(rolltextsliced[i]);
+                textarray.push(rolltext);
+                    }
+                }
+            }
+            function text(caracteres){
+                this.PosY=textheight;
+                this.PosX=textX;
+                this.string=caracteres;
+                this.speed=0.5;
+                textheight=textheight-10;
+                textX=textX+60;
+            }
+
+            //KeyDown Event Detects Movement Keys and Shoot Key
+            window.onkeydown = function(e) {
+            var pressedButton = e.keyCode;
+            if(pressedButton==68){move(true);}
+            if(pressedButton==65){move(false);}
+            }
+            
+            //KeyUp Event Detects Released Keys
+            window.onkeyup = function(e) {
+            var pressedButton = e.keyCode;
+            if(pressedButton==68 && Jelly.movingRight==true){
+                Jelly.moving=false;
+            }
+            if(pressedButton==65 && Jelly.movingRight==false){
+                Jelly.moving=false;
+            }
+            if(pressedButton==32){dispara();}
+            }
+            </script>
+            
+    </head>
+    <body onload="draw();rollingtext();" onresize="location.reload();">
+        <div style="text-align: center;width:100%;">
+        <canvas id="Canvas" width="100" height="100" style="border:1px solid #000000;"></canvas>
+        <img id="Jelly" width="0" height="0" src="images/Jelly.png" style="position: absolute;">
+        <img id="Background" width="0" height="0" src="images/Background.png" style="position: absolute;">
+
+        </div>
+    </body>
+</html>
