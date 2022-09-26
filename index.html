@@ -146,7 +146,7 @@
                         i=bulletarray.length;
                         
                     }
-                    if(Math.abs(bulletarray[i].PosX-textarray[j].PosX)+Math.abs(bulletarray[i].PosY-textarray[j].PosY)<=50 && textarray[j].PosY>100){
+                    if(Math.abs(bulletarray[i].PosX-textarray[j].PosX)+Math.abs(bulletarray[i].PosY-textarray[j].PosY)<=50 && textarray[j].PosY>50){
 
                         bulletarray[i].PosX=8000;
                         bulletarray[i].PosY=8000;
@@ -320,7 +320,7 @@
                 this.string=caracteres;
                 this.speed=0.5;
                 textheight=textheight-10;
-                textX=textX+30;
+                textX=textX+40;
             }
 
             //KeyDown Event Detects Movement Keys and Shoot Key
